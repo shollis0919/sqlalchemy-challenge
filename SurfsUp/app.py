@@ -45,7 +45,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"For following routes enter date in YYYY,YYYY-MM,or YYYY-MM-DD format:"
+        f"<br/>"
+        f"For following routes enter date in YYYY, YYYY-MM, or YYYY-MM-DD format:<br/>"
         f"/api/v1.0/start-date<br/>"
         f"/api/v1.0/start-date/end-date<br/>"
     )
@@ -58,16 +59,16 @@ def precipitation():
 
     """Returns precipitation data for the last year"""
     # Query for last year of data
-    results = session.query(Measurement.date,Measurement.prcp).\
+    precip_results = session.query(Measurement.date,Measurement.prcp).\
         filter(Measurement.date >= '2016-08-23').\
             order_by(Measurement.date.desc()).all()
     
     #Use a dictionary to pass results through
-    d= dict(results)
+    precip_d= dict(precip_results)
 
     #Close sesssion and return results
     session.close() 
-    return jsonify(d)
+    return jsonify(precip_d)
 
 
 @app.route("/api/v1.0/stations")
@@ -105,32 +106,32 @@ def tobs():
 
     """Returns last year of data for most active station"""
     # Query all stations
-    results = session.query(Measurement.date,Measurement.tobs).\
+    tobs_results = session.query(Measurement.date,Measurement.tobs).\
         filter(Measurement.date > '2016-08-23', Measurement.station =='USC00519281' ).\
             order_by(Measurement.date.desc()).all()
 
     #Use a dictionary to pass through results list
-    d=dict(results)
+    tobs_dict=dict(tobs_results)
 
     #Close session and return results
     session.close()
-    return(d)
+    return(tobs_dict)
     
 
 @app.route("/api/v1.0/<start>")
 def temp_start_route(start):
     """Return the min,max, and avg temps calculated from specifed start date to end of data"""
     
-    results = session.query(func.min(Measurement.tobs),
+    start_results = session.query(func.min(Measurement.tobs),
                             func.max(Measurement.tobs),
                             func.avg(Measurement.tobs)).\
                                 filter(Measurement.date >= start).all()
     #package results into a list for passing
-    results = [tuple(row) for row in results]
+    start_results = [tuple(row) for row in start_results]
 
     #Close session and return results
     session.close()
-    return jsonify(results)
+    return jsonify(start_results)
 
 
 
@@ -139,18 +140,18 @@ def temp_start_route(start):
 def temp_start_end_route(start,end):
     """Return the min,max, and avg temps calculated from specifed start date to specified end of data"""
     
-    results = session.query(func.min(Measurement.tobs),
+    start_end_results = session.query(func.min(Measurement.tobs),
                             func.max(Measurement.tobs),
                             func.avg(Measurement.tobs)).\
                                 filter(Measurement.date >= start,Measurement.date <= end).all()
     
     #package results into a list for passing
 
-    results = [tuple(row) for row in results]
+    start_end_results = [tuple(row) for row in start_end_results]
 
     #Close session and return results
     session.close()
-    return jsonify(results)
+    return jsonify(start_end_results)
 
 
 
